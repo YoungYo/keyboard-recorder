@@ -1,11 +1,10 @@
+import datetime
+
 from pynput.keyboard import Listener
 from log import logger
-import platform
-
-
-PLATFORM = platform.system()
-MACOS = 'Darwin'
-WINDOWS = 'Windows'
+from model import KeyboardRecord
+import dao
+from config import PLATFORM, MACOS
 
 
 KEY_NAME_MAP = {
@@ -21,7 +20,7 @@ KEY_NAME_MAP = {
     'space': '空格',
     'esc': 'Esc',
     'delete': 'Delete',
-    'backspace': '⌫' if PLATFORM == MACOS else 'Backspace',
+    'backspace': 'Backspace',
     'tab': '⇥' if PLATFORM == MACOS else 'Tab',
     'caps_lock': 'Caps Lock',
     'right': '→',
@@ -58,10 +57,14 @@ def format_key(key):
 def on_press(key):
     key_id = format_key(key)
     if key_id in KEY_NAME_MAP:
-        key_id = KEY_NAME_MAP[key_id]
-    key_name = key.name if hasattr(key, 'name') else 'None'
-    key_vk = key.vk if hasattr(key, 'vk') else 'None'
-    logger.info(f"{PLATFORM}\t{key_id}\t{key_name}\t{key_vk}")
+        key_show_name = KEY_NAME_MAP[key_id]
+    else:
+        key_show_name = key_id
+    key_name = key.name if hasattr(key, 'name') else None
+    key_vk = key.vk if hasattr(key, 'vk') else None
+    logger.info(f"{PLATFORM}\t{key_show_name}\t{key_name}\t{key_vk}")
+    record = KeyboardRecord(key_show_name, key_name, key_vk, datetime.datetime.now(), PLATFORM)
+    dao.save_record(record)
 
 
 def on_release(key):
