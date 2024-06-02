@@ -3,3 +3,4 @@ venv/
 .idea/
 nohup.out
 config.json
+__pycache__/
